@@ -1,4 +1,4 @@
-This is my contribution for the GAME OFF 2018
+This is my contribution for GAME OFF 2018
 The theme was "Hybrid"
 My game is a Hybrid of a SOKOBAN like game, and a match three game, one of those
 where putting together three things of the same type gives you points and an
