@@ -1,0 +1,3 @@
+score,100
+time,180
+cubes,2
