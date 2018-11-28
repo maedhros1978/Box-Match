@@ -28,6 +28,8 @@
 # LIBRARIES
 import pygame as pg
 import random
+import sys
+import pickle
 
 # FREE CONSTANTS
 BOX_EDGE = 50      # PLAYER AND BOX SQUARES; FUDAMENTAL UNIT OF DISTANCE
@@ -225,6 +227,8 @@ class Level():
             self.current_speed += 1
             self.new_box_delay = self.box_delay[self.current_speed][1]
         self.companions = len([v for v in self.level_dict.values() if v == "B5"])
+        if self.kind == 4 and self.companions == 1:
+            self.you_win()
     
     def add_box(self):
         """Add a random box in an empty positions, according to the weights given
@@ -319,6 +323,11 @@ class Application():
         pg.display.set_caption("Box Match")
         pg.display.set_icon(self.get_image('player.ico'))
         self.screen = Screen(SCREEN_LENGTH, SCREEN_HEIGHT)
+        try:
+            with open("Highscores.txt") as file:
+                self.highscores = pickle.load(file)
+        except EOFError:
+            self.highscores = {1:[103,3,600], 2:[103,2,600], 3:[103,15,6000], 4:[103,1,600]}
     
     def reset_timer(self):
         self.timer_start = pg.time.get_ticks()
@@ -485,29 +494,51 @@ class Application():
         "Draws the player and boxes and score and time on the screen surface"
         if not self.pause:
             self.screen.surf.fill((0,0,0))
+            level = self.screen.area.level
             pg.draw.rect(self.screen.surf, internal_color, self.screen.area.rectangle)
-            for i, box in enumerate(self.screen.area.level.boxes):
+            for i, box in enumerate(level.boxes):
                 self.screen.surf.blit(self.get_image('Box' + str(box.kind) + '.bmp'),\
                                       box.rectangle)
-            self.screen.surf.blit(self.get_image('Player.bmp'), self.screen.area.level.player.rectangle)
-            text = "Score: %d" % self.screen.area.level.score
+            self.screen.surf.blit(self.get_image('Player.bmp'), level.player.rectangle)
+            text = "Score: %d" % level.score
             font = pg.font.Font(None, 30)
             fg = 250, 250, 250
             bg = 0, 0, 0
             ren = font.render(text, 0, fg, bg)
             self.screen.surf.blit(ren, (10, 10))
-            text = "Companions: %d" % self.screen.area.level.companions
+            text = "Companions: %d" % level.companions
             font = pg.font.Font(None, 30)
             fg = 250, 250, 250
             bg = 0, 0, 0
             length, height = ren.get_size()
             ren = font.render(text, 0, fg, bg)
             self.screen.surf.blit(ren, ((SCREEN_LENGTH - length)//2, 10))
-            text = "Timer: %2sm:%2ss" %((int(self.seconds)//60)%60,\
+            text = "Time: %2sm:%2ss" %((int(self.seconds)//60)%60,\
                                         int(self.seconds)%60)
             ren = font.render(text, 0, fg, bg)
             length, height = ren.get_size()
             self.screen.surf.blit(ren, (SCREEN_LENGTH - length - 10, 10))
+            text = "Highscore: %d" % self.highscores[level.kind][0]
+            font = pg.font.Font(None, 30)
+            fg = 250, 250, 250
+            bg = 0, 0, 0
+            ren = font.render(text, 0, fg, bg)
+            length, height = ren.get_size()
+            self.screen.surf.blit(ren, (10, SCREEN_HEIGHT - 10 - height))
+            text = "Companions: %d" % self.highscores[level.kind][1]
+            font = pg.font.Font(None, 30)
+            fg = 250, 250, 250
+            bg = 0, 0, 0
+            length, height = ren.get_size()
+            ren = font.render(text, 0, fg, bg)
+            self.screen.surf.blit(ren, ((SCREEN_LENGTH - length)//2,\
+                                        SCREEN_HEIGHT - 10 - height))
+            text = "Time: %2sm:%2ss" %((int(self.highscores[level.kind][2])//60)%60,\
+                                        int(self.highscores[level.kind][2])%60)
+            ren = font.render(text, 0, fg, bg)
+            length, height = ren.get_size()
+            self.screen.surf.blit(ren, (SCREEN_LENGTH - length - 10,\
+                                        SCREEN_HEIGHT - 10 - height))
         else:
             text = "PAUSED"
             font = pg.font.Font(None, 150)
@@ -581,66 +612,87 @@ class Application():
         level.update_dict()
         
         if level.lose or level.win:
-            go_on = True
-            while go_on:
-                self.clock.tick(fps)
-                self.screen.surf.fill((0,0,0))
-                text = "Box Match"
-                font = pg.font.Font(None, 100)
-                fg = 255, 0, 0
-                ren = font.render(text, 0, fg)
-                length, height = ren.get_size()
-                distance_so_far = 30 + height
-                self.screen.surf.blit(ren,\
-                                      ((SCREEN_LENGTH - length)// 2,\
-                                       30))
-                text = "GAME OVER"
-                font = pg.font.Font(None, 100)
-                fg = 255, 0, 0
-                ren = font.render(text, 0, fg)
-                length, height = ren.get_size()
-                distance_so_far += height + 60
-                self.screen.surf.blit(ren,\
-                                      ((SCREEN_LENGTH - length)// 2,\
-                                       distance_so_far))
-                text = "Score: %d" % self.screen.area.level.score
-                font = pg.font.Font(None, 40)
-                fg = 255, 0, 0
-                ren = font.render(text, 0, fg,)
-                length, height = ren.get_size()
-                distance_so_far += height + 50
-                self.screen.surf.blit(ren,\
-                                      ((SCREEN_LENGTH - length)// 2,\
-                                       distance_so_far))
-                text = "Companions: %d" % self.screen.area.level.companions
-                font = pg.font.Font(None, 40)
-                fg = 255, 0, 0
-                ren = font.render(text, 0, fg,)
-                length, height = ren.get_size()
-                distance_so_far += height + 30
-                self.screen.surf.blit(ren,\
-                                      ((SCREEN_LENGTH - length)// 2,\
-                                       distance_so_far))
-                text = "Timer: %2sm:%2ss" %((int(self.seconds)//60)%60,\
-                                            int(self.seconds)%60)
-                font = pg.font.Font(None, 40)
-                fg = 255, 0, 0
-                ren = font.render(text, 0, fg, )
-                length, height = ren.get_size()
-                distance_so_far += height + 30
-                self.screen.surf.blit(ren,\
-                                      ((SCREEN_LENGTH - length)// 2,\
-                                       distance_so_far))
-                pg.display.flip()
-                for event in pg.event.get():
-                    if event.type == pg.KEYDOWN:
-                        go_on = False
-            level.lose = False
             self.is_in_game = False
+            level.lose = False
+            level.win = False
+            go_on = True
+            self.clock.tick(fps)
+            self.screen.surf.fill((0,0,0))
+            text = "Box Match"
+            font = pg.font.Font(None, 100)
+            fg = 255, 0, 0
+            ren = font.render(text, 0, fg)
+            length, height = ren.get_size()
+            distance_so_far = 30 + height
+            self.screen.surf.blit(ren,\
+                                  ((SCREEN_LENGTH - length)// 2,\
+                                   30))
+            text = "GAME OVER"
+            font = pg.font.Font(None, 100)
+            fg = 255, 0, 0
+            ren = font.render(text, 0, fg)
+            length, height = ren.get_size()
+            distance_so_far += height + 60
+            self.screen.surf.blit(ren,\
+                                  ((SCREEN_LENGTH - length)// 2,\
+                                   distance_so_far))
+            text = "Score: %d" % self.screen.area.level.score
+            font = pg.font.Font(None, 40)
+            fg = 255, 0, 0
+            ren = font.render(text, 0, fg,)
+            length, height = ren.get_size()
+            distance_so_far += height + 50
+            self.screen.surf.blit(ren,\
+                                  ((SCREEN_LENGTH - length)// 2,\
+                                   distance_so_far))
+            text = "Companions: %d" % self.screen.area.level.companions
+            font = pg.font.Font(None, 40)
+            fg = 255, 0, 0
+            ren = font.render(text, 0, fg,)
+            length, height = ren.get_size()
+            distance_so_far += height + 30
+            self.screen.surf.blit(ren,\
+                                  ((SCREEN_LENGTH - length)// 2,\
+                                   distance_so_far))
+            text = "Time: %2sm:%2ss" %((int(self.seconds)//60)%60,\
+                                        int(self.seconds)%60)
+            font = pg.font.Font(None, 40)
+            fg = 255, 0, 0
+            ren = font.render(text, 0, fg, )
+            length, height = ren.get_size()
+            distance_so_far += height + 30
+            self.screen.surf.blit(ren,\
+                                  ((SCREEN_LENGTH - length)// 2,\
+                                   distance_so_far))
+            pg.display.flip()
+            with open("Highscores.txt", 'w') as file:
+                if level.score > self.highscores[level.kind][0]:
+                    self.highscores[level.kind][0] = level.score
+                if level.companions > self.highscores[level.kind][1]:
+                    self.highscores[level.kind][1] = level.companions
+                if self.seconds < self.highscores[level.kind][2]:
+                    self.highscores[level.kind][2] = self.seconds
+                pickle.dump(self.highscores, file)
+            area.restart(1)
+            while go_on:
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        if self.ask_exit():
+                            self.run = False
+                            go_on = False
+                    elif event.type == pg.KEYDOWN:
+                        go_on = False
         
 if __name__ == '__main__':
     "Start application object and handles quitting"
     pg.init()
     app = Application()
-    app.main()
+    try:
+        app.main() # CATCH EXEPTIONS AND PRINT SOME INFO, USEFUL DURING DEBUG
+    except Exception:
+        print("Unhandled exception in file " + \
+              str(sys.exc_info()[2].tb_frame.f_code.co_filename) + \
+              " on line " + str(sys.exc_info()[2].tb_lineno) + ".\nGot a " + \
+              str(sys.exc_info()[0]) + " while running.\nExplanation: " + \
+              str(sys.exc_info()[1]) + "\nThe application will now quit.")
     pg.quit()
