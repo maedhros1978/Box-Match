@@ -335,6 +335,7 @@ class Application():
         self.seconds = 0
         self.temp_ticks = 0
         self.temp_seconds = 0
+        self.count = 0
     
     def ask_exit(self):
         "Asks if the user wants to quit"
@@ -460,35 +461,145 @@ class Application():
                         go_on = False
                     else:
                         self.write_menu()
-                elif event.type == event.type == pg.KEYDOWN and event.key == pg.K_1:
+                elif event.type == pg.KEYDOWN and event.key == pg.K_1:
                     go_on = False
                     self.reset_timer()
                     area.restart(1)
                     self.is_in_game = True
-                elif event.type == event.type == pg.KEYDOWN and event.key == pg.K_2:
+                elif event.type == pg.KEYDOWN and event.key == pg.K_2:
                     go_on = False
                     self.reset_timer()
                     area.restart(2)
                     self.is_in_game = True
-                elif event.type == event.type == pg.KEYDOWN and event.key == pg.K_3:
+                elif event.type == pg.KEYDOWN and event.key == pg.K_3:
                     go_on = False
                     self.reset_timer()
                     area.restart(3)
                     self.is_in_game = True
-                elif event.type == event.type == pg.KEYDOWN and event.key == pg.K_4:
+                elif event.type == pg.KEYDOWN and event.key == pg.K_4:
                     go_on = False
                     self.reset_timer()
                     area.restart(4)
                     self.is_in_game = True
-                elif event.type == event.type == pg.KEYDOWN and event.key == pg.K_5:
+                elif event.type == pg.KEYDOWN and event.key == pg.K_5:
                     self.write_help()
                     self.help_screen()
     
     def write_help(self):
-        pass
+        self.screen.surf.fill((0,0,0))
+        text = "Help"
+        font = pg.font.Font(None, 90)
+        fg = 255, 0, 0
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far = 30 + height
+        self.screen.surf.blit(ren,\
+                              ((SCREEN_LENGTH - length)// 2,\
+                               30))
+        text = "You control the player (the one with the face) with the arrows."
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 30
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "You can push one box (the other squares), but not two boxes"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "together. When you put three boxes close to each other, and"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "give them another push, you get one upgraded box.There are 4"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "normal boxes (red, yellow, green, purple in this order), and one"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "special companion box (with a heart!). The companion"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "box cannot be matched. Every few seconds a new box appear."
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "When the screen is filled the game is over."
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "There are 4 game modes normal, crazy (just faster), peaceful"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 30
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "(the speed does not grow, so you can calmly make companions),"
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "and race (just be quick to make a companion box)."
+        font = pg.font.Font(None, 30)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 15
+        self.screen.surf.blit(ren, (10, distance_so_far))
+        text = "That's it!"
+        font = pg.font.Font(None, 70)
+        fg = 250, 250, 250
+        ren = font.render(text, 0, fg)
+        length, height = ren.get_size()
+        distance_so_far += height + 20
+        self.screen.surf.blit(ren,\
+                              ((SCREEN_LENGTH - length)// 2,\
+                               distance_so_far))
+        pg.display.flip()
     
     def help_screen(self):
-        pass
+        go_on = True
+        while go_on:
+            for event in pg.event.get():
+                if event.type == pg.QUIT\
+                or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE): # QUIT
+                    if self.ask_exit():
+                        self.run = False
+                        self.screen.surf.fill((0,0,0))
+                        pg.display.flip()
+                        go_on = False
+                    else:
+                        self.write_menu()
+                elif event.type == pg.KEYDOWN:
+                    go_on = False
+                    self.write_menu()
     
     def draw(self):
         "Draws the player and boxes and score and time on the screen surface"
