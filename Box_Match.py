@@ -30,6 +30,15 @@ import pygame as pg
 import random
 import sys
 import pickle
+import os
+
+# FOR PYINSTALLER
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
+DATA_DIR = 'data'
 
 # FREE CONSTANTS
 BOX_EDGE = 50      # PLAYER AND BOX SQUARES; FUDAMENTAL UNIT OF DISTANCE
@@ -56,6 +65,10 @@ NEW_BOX_PROBABILITY = [(100, 0, 0, 0, 0),\
                        (60, 90, 100, 0, 0),\
                        (60, 85, 95, 100, 0),\
                        (50, 80, 95, 100, 0)] # PROBABILITIES OF APPEARANCE BY BOX TYPE
+
+TITLE_SIZE  = 80
+MENU_SIZE   = 40
+SMALL_SIZE  = 20
 
 # OTHER CONSTANTS, OBTAINED FROM THE ABOVE
 BORDER_WIDTH = BORDER_GRID * BOX_EDGE
@@ -153,7 +166,7 @@ class Level():
         return has_moved
 	
     def you_win(self):
-        "In peaceful mode, you ot to the companion box"
+        "In peaceful mode, you got to the companion box"
         self.win = True
     
     def game_over(self):
@@ -324,7 +337,7 @@ class Application():
         pg.display.set_icon(self.get_image('player.ico'))
         self.screen = Screen(SCREEN_LENGTH, SCREEN_HEIGHT)
         try:
-            with open("Highscores.txt") as file:
+            with open(resource_path(os.path.join(DATA_DIR, "Highscores.txt")), 'rb') as file:
                 self.highscores = pickle.load(file)
         except EOFError:
             self.highscores = {1:[103,3,600], 2:[103,2,600], 3:[103,15,6000], 4:[103,1,600]}
@@ -345,7 +358,7 @@ class Application():
             text = "Quit to Menu (y/n)"
         else:
             text = "Really Quit (y/n)"
-        font = pg.font.Font(None, 100)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -365,11 +378,12 @@ class Application():
     
     def get_image(self,path):
         "Adds image to the library"
-        image = self.image_library.get(path)
+        image = self.image_library.get(resource_path(os.path.join(DATA_DIR, path)))
         if image == None:
-            image = pg.image.load(path)
-            self.image_library[path] = image
+            image = pg.image.load(resource_path(os.path.join(DATA_DIR, path)))
+            self.image_library[resource_path(os.path.join(DATA_DIR, path))] = image
         return image
+    
     
     def main(self):
         "Main loop. Tick, update, draw"
@@ -381,7 +395,7 @@ class Application():
     def write_menu(self):    
         self.screen.surf.fill((0,0,0))
         text = "Box Match"
-        font = pg.font.Font(None, 100)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), TITLE_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -390,7 +404,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                30))
         text = "1. Normal mode"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -399,7 +413,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                distance_so_far))
         text = "2. Crazy mode"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -408,7 +422,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                distance_so_far))
         text = "3. Peaceful mode"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -417,7 +431,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                distance_so_far))
         text = "4. Race mode"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -426,7 +440,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                distance_so_far))
         text = "5. Help"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -435,7 +449,7 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                distance_so_far))
         text = "ESC. Quit"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -482,13 +496,14 @@ class Application():
                     area.restart(4)
                     self.is_in_game = True
                 elif event.type == pg.KEYDOWN and event.key == pg.K_5:
+                    go_on = False
                     self.write_help()
                     self.help_screen()
     
     def write_help(self):
         self.screen.surf.fill((0,0,0))
         text = "Help"
-        font = pg.font.Font(None, 90)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), TITLE_SIZE)
         fg = 255, 0, 0
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -497,84 +512,84 @@ class Application():
                               ((SCREEN_LENGTH - length)// 2,\
                                30))
         text = "You control the player (the one with the face) with the arrows."
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 30
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "You can push one box (the other squares), but not two boxes"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "together. When you put three boxes close to each other, and"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "give them another push, you get one upgraded box.There are 4"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "normal boxes (red, yellow, green, purple in this order), and one"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "special companion box (with a heart!). The companion"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "box cannot be matched. Every few seconds a new box appear."
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "When the screen is filled the game is over."
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "There are 4 game modes normal, crazy (just faster), peaceful"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 30
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "(the speed does not grow, so you can calmly make companions),"
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "and race (just be quick to make a companion box)."
-        font = pg.font.Font(None, 30)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
         distance_so_far += height + 15
         self.screen.surf.blit(ren, (10, distance_so_far))
         text = "That's it!"
-        font = pg.font.Font(None, 70)
+        font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
         fg = 250, 250, 250
         ren = font.render(text, 0, fg)
         length, height = ren.get_size()
@@ -612,13 +627,13 @@ class Application():
                                       box.rectangle)
             self.screen.surf.blit(self.get_image('Player.bmp'), level.player.rectangle)
             text = "Score: %d" % level.score
-            font = pg.font.Font(None, 30)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
             fg = 250, 250, 250
             bg = 0, 0, 0
             ren = font.render(text, 0, fg, bg)
             self.screen.surf.blit(ren, (10, 10))
             text = "Companions: %d" % level.companions
-            font = pg.font.Font(None, 30)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
             fg = 250, 250, 250
             bg = 0, 0, 0
             length, height = ren.get_size()
@@ -630,14 +645,14 @@ class Application():
             length, height = ren.get_size()
             self.screen.surf.blit(ren, (SCREEN_LENGTH - length - 10, 10))
             text = "Highscore: %d" % self.highscores[level.kind][0]
-            font = pg.font.Font(None, 30)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
             fg = 250, 250, 250
             bg = 0, 0, 0
             ren = font.render(text, 0, fg, bg)
             length, height = ren.get_size()
             self.screen.surf.blit(ren, (10, SCREEN_HEIGHT - 10 - height))
             text = "Companions: %d" % self.highscores[level.kind][1]
-            font = pg.font.Font(None, 30)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), SMALL_SIZE)
             fg = 250, 250, 250
             bg = 0, 0, 0
             length, height = ren.get_size()
@@ -652,7 +667,7 @@ class Application():
                                         SCREEN_HEIGHT - 10 - height))
         else:
             text = "PAUSED"
-            font = pg.font.Font(None, 150)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), TITLE_SIZE)
             fg = 0, 0, 0
             ren = font.render(text, 0, fg)
             length, height = ren.get_size()
@@ -730,7 +745,7 @@ class Application():
             self.clock.tick(fps)
             self.screen.surf.fill((0,0,0))
             text = "Box Match"
-            font = pg.font.Font(None, 100)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), TITLE_SIZE)
             fg = 255, 0, 0
             ren = font.render(text, 0, fg)
             length, height = ren.get_size()
@@ -739,7 +754,7 @@ class Application():
                                   ((SCREEN_LENGTH - length)// 2,\
                                    30))
             text = "GAME OVER"
-            font = pg.font.Font(None, 100)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), TITLE_SIZE)
             fg = 255, 0, 0
             ren = font.render(text, 0, fg)
             length, height = ren.get_size()
@@ -748,7 +763,7 @@ class Application():
                                   ((SCREEN_LENGTH - length)// 2,\
                                    distance_so_far))
             text = "Score: %d" % self.screen.area.level.score
-            font = pg.font.Font(None, 40)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
             fg = 255, 0, 0
             ren = font.render(text, 0, fg,)
             length, height = ren.get_size()
@@ -757,7 +772,7 @@ class Application():
                                   ((SCREEN_LENGTH - length)// 2,\
                                    distance_so_far))
             text = "Companions: %d" % self.screen.area.level.companions
-            font = pg.font.Font(None, 40)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
             fg = 255, 0, 0
             ren = font.render(text, 0, fg,)
             length, height = ren.get_size()
@@ -767,7 +782,7 @@ class Application():
                                    distance_so_far))
             text = "Time: %2sm:%2ss" %((int(self.seconds)//60)%60,\
                                         int(self.seconds)%60)
-            font = pg.font.Font(None, 40)
+            font = pg.font.Font(resource_path(os.path.join('data', 'freesansbold.ttf')), MENU_SIZE)
             fg = 255, 0, 0
             ren = font.render(text, 0, fg, )
             length, height = ren.get_size()
@@ -776,7 +791,7 @@ class Application():
                                   ((SCREEN_LENGTH - length)// 2,\
                                    distance_so_far))
             pg.display.flip()
-            with open("Highscores.txt", 'w') as file:
+            with open(resource_path(os.path.join(DATA_DIR, "Highscores.txt")), 'wb') as file:
                 if level.score > self.highscores[level.kind][0]:
                     self.highscores[level.kind][0] = level.score
                 if level.companions > self.highscores[level.kind][1]:
